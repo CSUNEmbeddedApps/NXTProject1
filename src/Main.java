@@ -17,31 +17,38 @@ public class Main {
 	//Port 1 --> Ultrasonic
 	//Port 2 --> Light 
 	
-	
+	static long tStart;
 	static UltrasonicSensor usonic = new UltrasonicSensor(SensorPort.S1); //UltraSonic Sensor
 	static LightSensor lightRight = new LightSensor(SensorPort.S2); //Light Sensor
 	static LightSensor lightLeft = new LightSensor(SensorPort.S3); //Light Sensor
-	static long tStart;
+	
+	
 	//controls both wheels simutaneously
 	static DifferentialPilot pilot = new DifferentialPilot(2.25f, 5.5f, Motor.A, Motor.B);
 	
 	static boolean run = true;
 	static Random rand = new Random();
+	
 	public static void main(String[] args) {	
+		
+		//Initialize Speeds
 		pilot.setTravelSpeed(8.0f);
 		pilot.setRotateSpeed(10.0f);
 		
 		//Set mode to continually check for objects
 		usonic.continuous();
 		
+		
 		tStart = System.currentTimeMillis();
 		long delta = 0;
+		
 		while(run)
 		{	
 			long tCurr = System.currentTimeMillis();
 			delta = tCurr - tStart;
 			
 			tStart = tCurr;
+			
 			//Move forward if nothing nearby
 			if(usonic.getDistance() > 40)
 			{		
@@ -50,16 +57,9 @@ public class Main {
 				pilot.forward();
 				delta = 0;
 			}
-			//something nearby 
-//			else
-//			{
-//				stop();
-//				pilot.forward();
-////				pilot.rotate(15);				
-//			}
-////			
+			
 			if(usonic.getDistance() <= 40){
-				stop();
+				pilot.quickStop();          //Stop the robot quickly
 				pilot.setTravelSpeed(5.0f);
 				pilot.forward();
 				
@@ -93,7 +93,8 @@ public class Main {
 			if(!pilot.isMoving())
 				LCD.drawString("!moving", 0, 6);
 			
-			if(!pilot.isMoving()){
+			if(!pilot.isMoving())
+			{
 				pilot.backward();
 				Delay.msDelay(1000);
 			}
@@ -103,89 +104,10 @@ public class Main {
 			}
 			
 		} //Main Loop
-		//Stop Motors
-		stop();
-	}
-
-
+		
+		pilot.quickStop(); //Stop the robot quickly
 	
-	private static void stop()
-	{
-		Motor.A.stop();
-		Motor.B.stop();
-	}
-	
-	
-	private static int ultrasonicCheck()
-	{
-		//motor A corresponds to left wheel
-		//motor B corresponds to right wheel
-		
-		int val = 0; 
-				
-		
-		if(usonic.getDistance() <= 10)//something is on the right
-		{
-			val = 1;
-			
-		}
-		
-		Motor.C.rotate(180); //rotate left
-			
-		if(usonic.getDistance() <= 10) //something on the left
-		{
-			val = 2;
-				
-		}
-		else //nothing on right or left, randomly select
-		{
-			val = randomNum();
-			
-		}
-		return val;
-		
 		
 	}
 	
-//	private static int ultrasonicCheck()
-//	{
-//		//motor A corresponds to left wheel
-//		//motor B corresponds to right wheel
-//		
-//		int val = 0; 
-//		
-//		Motor.C.rotate(-90); //rotate right
-//		
-//		if(usonic.getDistance() <= 10)//something is on the right
-//		{
-//			val = 1;
-//			
-//		}
-//		
-//		Motor.C.rotate(180); //rotate left
-//			
-//		if(usonic.getDistance() <= 10) //something on the left
-//		{
-//			val = 2;
-//				
-//		}
-//		else //nothing on right or left, randomly select
-//		{
-//			val = randomNum();
-//			
-//		}
-//		return val;
-//		
-//		
-//	}
-	
-	private static int randomNum()
-	{
-		int Min = 0;
-		int Max = 1;
-		
-		//return either 1 or 2
-		return (Min + (int)(Math.random() * ((Max - Min) + 1)));
-		
-	}
 }
